@@ -188,6 +188,7 @@ void OLED_DrawCircle(u8 x,u8 y,u8 r,u8 t){
 	a = 0;
     	b = r;
 	while(2 * b * b >= r * r){
+		
 		OLED_DrawPoint(x + a, y - b,t);
         	OLED_DrawPoint(x - a, y - b,t);
         	OLED_DrawPoint(x - a, y + b,t);
@@ -297,7 +298,7 @@ u32 OLED_Pow(u8 m,u8 n){
 	u32 result=1;
 	
 	while(n--)
-	  result*=m;
+		result*=m;
   
 	return result;
 }
@@ -311,6 +312,7 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size1,u8 t){
 	u8 k,temp;
 	
 	for(k=0;k<len;k++){
+		
 		temp=(num/OLED_Pow(10,len-k-1))%10;
 		if(temp==0)
 			OLED_ShowChar(x+(size1/2)*k,y,'0',size1,t);
@@ -332,32 +334,37 @@ void OLED_ShowChinese(u8 x,u8 y,u8 num,u8 size1,u8 t){
 
 		chr1=num*size1/8+n;
 		n++;
-			for(i=0;i<size1;i++)
-			{
-				if(size1==16)
-						{temp=Hzk1[chr1][i];}//调用16*16字体
-				else if(size1==24)
-						{temp=Hzk2[chr1][i];}//调用24*24字体
-				else if(size1==32)       
-						{temp=Hzk3[chr1][i];}//调用32*32字体
-				else if(size1==64)
-						{temp=Hzk4[chr1][i];}//调用64*64字体
-				else return;
+		
+		for(i=0;i<size1;i++){
+				
+			if(size1==16)
+				temp=Hzk1[chr1][i];//调用16*16字体
+			else if(size1==24)
+				temp=Hzk2[chr1][i];//调用24*24字体
+			else if(size1==32)       
+					temp=Hzk3[chr1][i];//调用32*32字体
+			else if(size1==64)
+				temp=Hzk4[chr1][i];}//调用64*64字体
+			else return;
 							
-						for(m=0;m<8;m++)
-							{
-//								if(temp&0x01)
-//								{OLED_DrawPoint(x,y,t);}
-								(temp & 0x01) ? OLED_DrawPoint(x, y, !t) : OLED_DrawPoint(x, y, t);
-								temp>>=1;
-								y++;
-							}
-							x++;
-							if((x-x0)==size1)
-							{x=x0;y0=y0+8;}
-							y=y0;
-			 }
-	//			OLED_Refresh();
+			for(m=0;m<8;m++){
+					
+//				if(temp&0x01)
+//					{OLED_DrawPoint(x,y,t);}
+				(temp & 0x01) ? OLED_DrawPoint(x, y, !t) : OLED_DrawPoint(x, y, t);
+				temp>>=1;
+				y++;
+			}
+		
+			x++;
+			if((x-x0)==size1){
+				x=x0;
+				y0=y0+8;
+			}
+			y=y0;
+		}
+//		
+		OLED_Refresh();
 	}
 }
 
@@ -369,35 +376,27 @@ void OLED_ScrollDisplay(u8 num,u8 space,u8 k){
 
 	while(1){
 
-		if(m==0)
-		{
-	    OLED_ShowChinese(128,24,t,16,k); //写入一个汉字保存在OLED_GRAM[][]数组中
+		if(m==0){
+			
+			OLED_ShowChinese(128,24,t,16,k); //写入一个汉字保存在OLED_GRAM[][]数组中
 			t++;
 		}
-		if(t==num)
-			{
-				for(r=0;r<16*space;r++)      //显示间隔
-				 {
-					for(i=0;i<144;i++)
-						{
-							for(n=0;n<8;n++)
-							{
-								OLED_GRAM[i-1][n]=OLED_GRAM[i][n];
-							}
-						}
-           OLED_Refresh();
-				 }
-        t=0;
-      }
-		m++;
-		if(m==16){m=0;}
-		for(i=0;i<144;i++)   //实现左移
-		{
-			for(n=0;n<8;n++)
-			{
-				OLED_GRAM[i-1][n]=OLED_GRAM[i][n];
-			}
+		if(t==num){
+			for(r=0;r<16*space;r++)      //显示间隔
+				for(i=0;i<144;i++)
+					for(n=0;n<8;n++)
+						OLED_GRAM[i-1][n]=OLED_GRAM[i][n];
+           		OLED_Refresh();
 		}
+		
+        	t=0;
+		m++;
+		if(m==16) m=0;
+		
+		for(i=0;i<144;i++)   //实现左移
+			for(n=0;n<8;n++)
+				OLED_GRAM[i-1][n]=OLED_GRAM[i][n];
+
 		OLED_Refresh();
 	}
 }
@@ -413,67 +412,66 @@ void OLED_WR_BP(u8 x,u8 y)
 //x0,y0：起点坐标
 //x1,y1：终点坐标
 //BMP[]：要写入的图片数组
-void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[])
-{
+void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]){
+	
 	u32 j=0;
 	u8 x=0,y=0;
+	
 	if(y%8==0)y=0;
 	else y+=1;
-	for(y=y0;y<y1;y++)
-	 {
-		 OLED_WR_BP(x0,y);
-		 for(x=x0;x<x1;x++)
-		 {
+	for(y=y0;y<y1;y++){
+		
+		OLED_WR_BP(x0,y);
+		for(x=x0;x<x1;x++){
+			
 			 OLED_WR_Byte(BMP[j],OLED_DATA);
 			 j++;
-     }
-	 }
-}
-void OLED_Fill(u8 x0, u8 y0, u8 x1, u8 y1, u8 t)
-{
-	u8 x, y;
-	for (x = x0; x < x1; x++)
-	{
-		for (y = y0; y < y1; y++)
-		{
-			OLED_DrawPoint(x, y, t);
 		}
 	}
+}
+
+void OLED_Fill(u8 x0, u8 y0, u8 x1, u8 y1, u8 t){
+	
+	u8 x, y;
+	
+	for (x = x0; x < x1; x++)
+		for (y = y0; y < y1; y++)
+			OLED_DrawPoint(x, y, t);
+	
 //	OLED_Refresh();
 }
-void OLED_DrawRectangle(u8 x0, u8 y0, u8 x1, u8 y1, u8 t)
-{
-	 u8 y_0, y_1, x_0, x_1, i;
-	if (y0 > y1)	//??y0?y1???
-	{
+void OLED_DrawRectangle(u8 x0, u8 y0, u8 x1, u8 y1, u8 t){
+	
+	u8 y_0, y_1, x_0, x_1, i;
+	
+	if (y0 > y1){
+		
 		y_0 = y1;
 		y_1 = y0;
-	}
-	else
-	{
+	}else{
+		
 		y_0 = y0;
 		y_1 = y1;
 	}
 	
-	if (x0 > x1)	//??x0?x1???
-	{
+	if (x0 > x1){
+		
 		x_0 = x1;
 		x_1 = x0;
-	}
-	else
-	{
+	}else{
+		
 		x_0 = x0;
 		x_1 = x1;
 	}
-	
-	for (i = x_0 ; i <= x_1; i++)	//????
-	{
+
+	for (i = x_0 ; i <= x_1; i++){
+		
 		OLED_DrawPoint(i, y0, t);
 		OLED_DrawPoint(i, y1, t);
 	}
 	
-	for (i = y_0 ; i <= y_1; i++)	//????
-	{
+	for (i = y_0 ; i <= y_1; i++){
+		
 		OLED_DrawPoint(x0, i, t);
 		OLED_DrawPoint(x1, i, t);
 	}
@@ -481,8 +479,8 @@ void OLED_DrawRectangle(u8 x0, u8 y0, u8 x1, u8 y1, u8 t)
 }
 
 //OLED的初始化
-void OLED_Init(void)
-{
+void OLED_Init(void){
+	
 //	GPIO_InitTypeDef  GPIO_InitStructure;
 // 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	 //使能A端口时钟
 //	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_7;	 
